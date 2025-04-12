@@ -7,14 +7,11 @@ import matplotlib as mpl
 
 import matplotlib.pyplot as plt
 
-from ipywidgets import interact, IntSlider
-
 from datetime import datetime
 
 from tqdm import tqdm
 
 import cv2
-from pdf2image import convert_from_path
 
 print(f'Updated module {datetime.now()}')
 
@@ -186,25 +183,4 @@ def movie(history_file, image_folder_name='./images', video_name='starmovie.avi'
 
     print(f'creating video {video_name}')
     create_video(image_folder_name, video_name=video_name, fps=fps)
-
-
-    # video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'DIVX'), fps, (800, 800))
-
-
-    # DF = pd.read_table(history_file, skiprows=5, sep=r'\s+')
-
-    # if end is None:
-    #     end = len(DF)
-
-    # fig=plt.figure()
-
-    # for i in tqdm(range(0, end)):
-    #     plot_convection_circles(DF, i, fig=fig, age_plot=age_plot)
-    #     fig.canvas.draw()
-    #     img_plot = np.array(fig.canvas.renderer.buffer_rgba())
-
-    #     video.write(img_plot,)
-
-    # video.release()
-    # cv2.destroyAllWindows()
 
