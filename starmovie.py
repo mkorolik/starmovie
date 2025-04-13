@@ -153,12 +153,7 @@ def create_video(image_folder, video_name='starmovie.avi', fps=15):
     
     print("Images:", images)
     
-    for img in images:
-        if img.endswith(".pdf"):
-            pages = convert_from_path(img)
-            for page in pages:
-                page.save("{img}.jpg", "jpg")
-
+  
     # Set frame from the first image
     frame = cv2.imread(os.path.join(image_folder, images[0]))
     height, width, layers = frame.shape
