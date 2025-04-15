@@ -153,19 +153,13 @@ def create_video(image_folder, video_name='starmovie.avi', fps=15):
     
     print("Images:", images)
     
-  
-    # Set frame from the first image
     frame = cv2.imread(os.path.join(image_folder, images[0]))
     height, width, layers = frame.shape
 
-    # Video writer to create .avi file
     video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'DIVX'), fps, (width, height))
 
-    # Appending images to video
     for image in tqdm(images):
         video.write(cv2.imread(os.path.join(image_folder, image)),)
-
-    # Release the video file
     video.release()
     cv2.destroyAllWindows()
     print(f"Video {video_name} generated successfully!")
