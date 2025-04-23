@@ -62,14 +62,17 @@ def plot_colors(y, xlim=[30000, 0], ax=None, alpha=0.5):
 
 
 
-def plot_HR(DF, idx=None, fig=None, ax=None, xlim=[10000, 3500], ylim=[0.1, 10000], linecolor='black', dotcolor='red'):
+def plot_HR(DF, idx=None, fig=None, ax=None, xlim=[10000, 3500], ylim=[0.1, 10000], linecolor='black', dotcolor='red', age_plot=False):
+    # if fig is not None:
+        # fig.clf()
+
     if fig is None:
         fig = plt.figure()
     
-    # fig.clf()
-
     if ax is None:
         ax=fig.gca()
+
+    ax.cla()
 
     plot_colors(np.arange(ylim[0], ylim[1]), xlim=xlim, ax=ax)
 
@@ -88,10 +91,12 @@ def plot_HR(DF, idx=None, fig=None, ax=None, xlim=[10000, 3500], ylim=[0.1, 1000
 
 
 def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plot=False, age_scale=10**-9, age_label='Gyr'):
+    # if fig is not None:
+        # fig.clf()
+        
     if fig is None:
         fig = plt.figure()
 
-    # fig.clf()
 
     colors = {'O':  (175/255, 201/255, 1),
             'B': (199/255, 216/255, 1),
@@ -109,7 +114,7 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
     if ax is None:
         ax=fig.gca()
     
-
+    ax.cla()
 
     initial_mass = DF.iloc[0]['star_mass']
 
@@ -169,14 +174,21 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
     ax.set_yticks([])
 
 
-def plot_both(DF, idx, fig=None, ax=None, figsize=(18,8), ageplot=True):
-    fig, axs = plt.subplots(1, 2, figsize=figsize)
+def plot_both(DF, idx, fig=None, axs=None, age_plot=True):
+    if fig is None:
+        fig, axs = plt.subplots(1, 2, figsize=(18, 8))
+    else:
+        axs = fig.get_axes()
 
     plot_HR(DF, idx=idx, fig=fig, ax=axs[0])
-    plot_convection_circles(DF, idx, fig=fig, ax=axs[1], age_plot=ageplot)
+    plot_convection_circles(DF, idx, fig=fig, ax=axs[1], age_plot=age_plot)
+
+    # # fig.clf()
+    # axs[0].cla()
+    # axs[1].cla()
 
 
-def create_image_folder(history_file, folder_name='./images', start=0, end=None, age_plot=False):
+def create_image_folder(history_file, plotfunction, folder_name='./images', start=0, end=None, age_plot=False):
     if end is None:
         end = len(pd.read_table(history_file)) - 5
     
@@ -186,14 +198,17 @@ def create_image_folder(history_file, folder_name='./images', start=0, end=None,
 
     DF = pd.read_table(history_file, skiprows=5, sep=r'\s+')
 
-
-    fig=plt.figure()
+    if plotfunction is not plot_both:
+        fig=plt.figure()
+    else:
+        fig, axs = plt.subplots(1, 2, figsize=(18, 8))
+ 
 
     for i in tqdm(range(start, end)):
-        plot_convection_circles(DF, i, fig=fig, age_plot=age_plot)
+        plotfunction(DF, idx=i, fig=fig, age_plot=age_plot)
 
         fig.savefig(f'{folder_name}/img{i}.png', dpi=100)
-
+        
 
 def create_video(image_folder, video_name='starmovie.avi', fps=15):
     images = [img for img in sorted(os.listdir('./images'), key=lambda x: os.path.getmtime(os.path.join('./images', x))) if img.endswith((".jpg", ".jpeg", ".png"))]
@@ -213,9 +228,9 @@ def create_video(image_folder, video_name='starmovie.avi', fps=15):
 
 
 
-def movie(history_file, image_folder_name='./images', video_name='starmovie.avi', age_plot=False, fps=15, end=None):
+def movie(history_file, plotfunction=plot_convection_circles, image_folder_name='./images', video_name='starmovie.avi', age_plot=False, fps=15, end=None):
     print(f'creating folder of images: {image_folder_name}')
-    create_image_folder(history_file=history_file, folder_name=image_folder_name, age_plot=age_plot, end=end)
+    create_image_folder(history_file=history_file, plotfunction=plotfunction, folder_name=image_folder_name, age_plot=age_plot, end=end)
 
     print(f'creating video {video_name}')
     create_video(image_folder_name, video_name=video_name, fps=fps)
