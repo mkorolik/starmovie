@@ -42,6 +42,47 @@ rgbs = [(1, 1, 1), # X, temp class just for setting upper bound
 solar_mass_g = 1.9885 * 10**33
 
 
+def plot_colors(y, xlim=[30000, 0], ax=None, alpha=0.5):
+    if ax is None:
+        ax = plt.gca()
+
+    ax.fill_betweenx(y, spectrals[0], spectrals[1], color=rgbs[1], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[1], spectrals[2], color=rgbs[2], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[2], spectrals[3], color=rgbs[3], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[3], spectrals[4], color=rgbs[4], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[4], spectrals[5], color=rgbs[5], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[5], spectrals[6], color=rgbs[6], alpha=alpha)
+    ax.fill_betweenx(y, spectrals[6], spectrals[7], color=rgbs[7], alpha=alpha)
+
+    ax.set_xlim(xlim)
+
+
+
+
+
+
+
+def plot_HR(DF, idx=None, fig=None, ax=None, xlim=[10000, 3500], ylim=[0.1, 10000], linecolor='black', dotcolor='red'):
+    if fig is None:
+        fig = plt.figure()
+    
+    # fig.clf()
+
+    if ax is None:
+        ax=fig.gca()
+
+    plot_colors(np.arange(ylim[0], ylim[1]), xlim=xlim, ax=ax)
+
+    ax.plot(10**DF['log_Teff'], 10**DF['log_L'], lw=1, color=linecolor)
+
+    if idx is not None:
+        ax.scatter(10**DF.iloc[idx]['log_Teff'], 10**DF.iloc[idx]['log_L'], color=dotcolor, zorder=100)
+
+    ax.set_yscale('log')
+    ax.set_ylim(ylim)
+
+    ax.set_xlabel('Effective Temperature [K]')
+    ax.set_ylabel(r'Luminosity [L / L$_\odot$]')
 
 
 
@@ -50,7 +91,7 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
     if fig is None:
         fig = plt.figure()
 
-    fig.clf()
+    # fig.clf()
 
     colors = {'O':  (175/255, 201/255, 1),
             'B': (199/255, 216/255, 1),
@@ -127,6 +168,12 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
     ax.set_xticks([])
     ax.set_yticks([])
 
+
+def plot_both(DF, idx, fig=None, ax=None, figsize=(18,8), ageplot=True):
+    fig, axs = plt.subplots(1, 2, figsize=figsize)
+
+    plot_HR(DF, idx=idx, fig=fig, ax=axs[0])
+    plot_convection_circles(DF, idx, fig=fig, ax=axs[1], age_plot=ageplot)
 
 
 def create_image_folder(history_file, folder_name='./images', start=0, end=None, age_plot=False):
