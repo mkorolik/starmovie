@@ -54,6 +54,12 @@ rxns = ['pp', 'cno', 'tri_alpha', 'c_alpha', 'n_alpha', 'o_alpha', 'ne_alpha', '
 rxn_colors = ['darkred', 'tomato', 'limegreen', 'teal', 'dodgerblue', 'darkblue', 'darkorchid', 'purple', 'magenta',
                'pink', 'pink', 'pink', 'pink', 'pink', 'pink', 'pink', 'pink', 'pink']
 
+burn_types = ['burn_type_' + str(i) for i in range(1,40)]
+burn_qtops = ['burn_qtop_' + str(i) for i in range(1,40)]
+
+cmap_burn = mpl.colormaps['YlOrRd']
+colors_burn = cmap_burn(np.linspace(0, 1, 20))
+
 
 
 
@@ -115,7 +121,7 @@ def plot_HR(DF, idx=None, fig=None, ax=None, xlim=[10000, 3500], ylim=[0.1, 1000
 
 
 
-def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plot=False, age_scale=10**-9, age_label='Gyr', originalburnplot=False):
+def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plot=False, age_scale=10**-9, age_label='Gyr', originalburnplot=False, newburning=False):
     # if fig is not None:
         # fig.clf()
         
@@ -169,12 +175,35 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
         if df['epsnuc_M_1'] != -20:
             he = mpl.patches.Annulus((0,0), df['epsnuc_M_4']  / solar_mass_g, (df['epsnuc_M_4'] - df['epsnuc_M_1']) / solar_mass_g, hatch='////', alpha=0)
             he_check=True
-    else:
-        if df['burn_type_1'] == 0:
-            anyburning=False
-        else:
-            anyburning=True
-            burnpatch = mpl.patches.Annulus
+    if newburning:
+        # if df['burn_type_1'] == 0:
+        #     anyburning=False
+        #     print('hihihihih')
+        # else:
+        anyburning=True
+
+        burn_types_df_row = DF.iloc[idx][burn_types]
+        burn_qtops_df_row = DF.iloc[idx][burn_qtops]
+                    
+        circles = []
+
+        for i, val in enumerate(burn_types_df_row):
+            if val == -9999.0:
+                break
+            if i == 0:
+                circles.append([0, burn_qtops_df_row[i]])
+            else:
+                circles.append([burn_qtops_df_row[i-1], burn_qtops_df_row[i]])
+        
+        burn_patches = []
+        # burn_color_idx = 0    
+        
+        for circle in circles:
+            burn_patches.append(mpl.patches.Annulus(
+                (0,0), circle[1]*mass, (circle[1]-circle[0])*mass, color='red', alpha=0.2
+            ))
+            # burn_color_idx += 1
+
 
    
     surface = mpl.patches.Annulus((0,0), mass + 0.1, 0.05, color=surface_color)
@@ -194,8 +223,10 @@ def plot_convection_circles(DF, idx, fig=None, base_color=None, ax=None, age_plo
         if he_check:
             ax.add_patch(he)
     
-    if anyburning:
-        ax.add_patch(burnpatch)
+    if newburning:
+        for burnpatch in burn_patches:
+            ax.add_patch(burnpatch)
+
 
     ax.add_patch(surface)
 
@@ -265,7 +296,7 @@ def create_video(image_folder, video_name='starmovie.avi', fps=15):
 
 
 
-def movie(history_file, plotfunction=plot_convection_circles, image_folder_name='./images', video_name='starmovie.avi', age_plot=False, fps=15, end=None):
+def movie(history_file, plotfunction=plot_convection_circles, image_folder_name='./images', video_name='starmovie.avi', age_plot=True, fps=15, end=None):
     print(f'creating folder of images: {image_folder_name}')
     create_image_folder(history_file=history_file, plotfunction=plotfunction, folder_name=image_folder_name, age_plot=age_plot, end=end)
 
